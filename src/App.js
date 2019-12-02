@@ -7,6 +7,7 @@ const HatsPage = () => {
 	return (
 		<div>
 			<h1>HATS PAGE</h1>
+			<h2>SHOP NOW</h2>
 		</div>
 	);
 };
