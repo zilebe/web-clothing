@@ -17,6 +17,13 @@ const cartReducer = (state = INITIAL_STATE, action) => {
 				...state,
 				cartItems: [...state.cartItems, action.payload]
 			};
+		case CartActionTypes.CLEAR_ITEM_FROM_CART:
+			return {
+				...state,
+				cartItems: state.cartItems.filter(
+					cartItem => cartItem.id !== action.payload.id
+				)
+			};
 		default:
 			return state;
 	}
@@ -37,11 +44,17 @@ export const addItem = item => ({
 	payload: item
 });
 
+export const clearItemFromCart = item => ({
+	type: CartActionTypes.CLEAR_ITEM_FROM_CART,
+	payload: item
+});
+
 ////////////////////////////////////////////////////////////
 
 const CartActionTypes = {
 	TOGGLE_CART_HIDDEN: "TOGGLE_CART_HIDDEN",
-	ADD_ITEM: "ADD_ITEM"
+	ADD_ITEM: "ADD_ITEM",
+	CLEAR_ITEM_FROM_CART: "CLEAR_ITEM_FROM_CART"
 };
 
 export default CartActionTypes;
@@ -95,3 +108,51 @@ const CollectionPreview = ({ items, title }) => {
 };
 
 export default CollectionPreview;
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import { connect } from "react-redux";
+import { clearItemFromCart } from "../../redux/cart/cart.actions";
+import "./checkout-item.scss";
+
+const CheckoutItem = ({ cartItem, clearItem }) => {
+	const { name, quantity, price, imageUrl } = cartItem;
+	return (
+		<div className="checkout-item">
+			<div className="image-container">
+				<img alt="item" src={imageUrl} />
+			</div>
+			<span className="name">{name}</span>
+			<span className="quantity">{quantity}</span>
+			<span className="price">{price}</span>
+			<div className="remove-button" onClick={() => clearItem(cartItem)}>
+				&#10005;
+			</div>
+		</div>
+	);
+};
+
+const mapDispatchToProps = dispatch => ({
+	clearItem: item => dispatch(clearItemFromCart(item))
+});
+
+export default connect(null, mapDispatchToProps)(CheckoutItem);
+
+////////////////////////////////////////////////////////
+
+export const removeItemFromCart = (cartItems, cartItemToRemove) => {
+	const existingCartItem = cartItems.find(
+		cartItem => cartItem.id === cartItemToRemove
+	);
+
+	if (existingCartItem === 1) {
+		return cartItems.filter(cartItem => cartItem.id !== cartItemToRemove);
+	}
+
+	return cartItems.map(cartItem =>
+		cartItem.id === cartItemToRemove
+			? { ...cartItem, quantity: cartItem.quantity - 1 }
+			: cartItem
+	);
+};
