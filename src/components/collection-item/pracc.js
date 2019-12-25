@@ -156,3 +156,226 @@ export const removeItemFromCart = (cartItems, cartItemToRemove) => {
 			: cartItem
 	);
 };
+
+////////////////////////////////////////////////////////
+
+import { createStore, applyMiddleware } from "redux";
+import { persistStore } from "redux-persist";
+import logger from "redux-logger";
+import rootReducer from "./root-reducer";
+
+const middleware = [logger];
+
+export const store = createStore(rootReducer, applyMiddleware(...middleware));
+
+export const persistor = persistStore(store);
+
+export default { store, persistor };
+
+////////////////////////////////////////////////////////
+
+import { combineReducers } from "redux";
+import storage from "redux-persist/lib/storage";
+import { persistReducer } from "redux-persist";
+
+import userReducer from "./user/user.reducer";
+import cartReducer from "./cart/cart.reducer";
+
+const persistConfig = {
+	key: "root",
+	storage,
+	whitelist: ["cart"]
+};
+
+const rootReducer = combineReducers({
+	user: userReducer,
+	cart: cartReducer
+});
+
+export default persistReducer(persistConfig, rootReducers);
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../../redux/store";
+import "./index.css";
+import App from "./App";
+
+ReactDOM.render(
+	<Provider store={store}>
+		<PersistGate persistor={persistor}>
+			<BrowserRouter>
+				<App />
+			</BrowserRouter>
+		</PersistGate>
+	</Provider>,
+	document.getElementById("root")
+);
+
+////////////////////////////////////////////////////////
+
+const INITIAL_STATE = {
+	sections: [
+		{
+			title: "hats",
+			imageUrl: "https://i.ibb.co/cvpntL1/hats.png",
+			id: 1,
+			linkUrl: "hats"
+		},
+		{
+			title: "jackets",
+			imageUrl: "https://i.ibb.co/px2tCc3/jackets.png",
+			id: 2,
+			linkUrl: ""
+		},
+		{
+			title: "sneakers",
+			imageUrl: "https://i.ibb.co/0jqHpnp/sneakers.png",
+			id: 3,
+			linkUrl: ""
+		},
+		{
+			title: "womens",
+			imageUrl: "https://i.ibb.co/GCCdy8t/womens.png",
+			size: "large",
+			id: 4,
+			linkUrl: ""
+		},
+		{
+			title: "mens",
+			imageUrl: "https://i.ibb.co/R70vBrQ/men.png",
+			size: "large",
+			id: 5,
+			linkUrl: ""
+		}
+	]
+};
+
+const directoryReducer = (state = INITIAL_STATE, action) => {
+	switch (action.type) {
+		default:
+			return state;
+	}
+};
+
+export default directoryReducer;
+
+////////////////////////////////////////////////////////
+
+import { combineReducers } from "redux";
+import { persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+
+import userReducer from "./user/user.reducer";
+import cartReducer from "./cart/cart.reducer";
+import directoryReducer from "../../redux/directory/directory.reducer";
+import shopReducer from "../../redux/shop/shop.reducer";
+
+const persistConfig = {
+	key: "root",
+	storage,
+	whitelist: ["cart"]
+};
+
+const rootReducer = combineReducers({
+	user: userReducer,
+	cart: cartReducer,
+	directory: directoryReducer,
+	shop: shopReducer
+});
+
+export default persistReducer(persistConfig, rootReducer);
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import MenuItem from "../menu-item/menu-item";
+import { createStructuredSelector } from "reselect";
+import { selectDirectorySections } from "../../redux/directory/directory.selectors";
+
+import { connect } from "react-redux";
+import "./directory.scss";
+import directory from "../directory/directory";
+
+const Directory = ({ sections }) => (
+	<div className="directory-menu">
+		{sections.map(({ id, ...otherSectionProps }) => (
+			<MenuItem key={id} {...otherSectionProps} />
+		))}
+	</div>
+);
+
+const mapStateToProps = createStructuredSelector({
+	sections: selectDirectorySections
+});
+
+export default connect(mapStateToProps)(Directory);
+
+////////////////////////////////////////////////////////
+directory.selector.js;
+
+import { createSelector } from "reselect";
+
+const selectDirectory = state => state.directory;
+
+export const selectDirectorySections = createSelector(
+	[selectDirectory],
+	directory => directory.sections
+);
+
+////////////////////////////////////////////////////////
+shop.reducer.js;
+
+import SHOP_DATA from "../../redux/shop/database";
+
+const INITIAL_STATE = {
+	collections: SHOP_DATA
+};
+
+const shopReducer = (state = INITIAL_STATE, action) => {
+	switch (action.type) {
+		default:
+			return state;
+	}
+};
+
+export default shopReducer;
+
+////////////////////////////////////////////////////////
+shop.selectors.js;
+
+import { createSelector } from "reselect";
+
+const selectShop = state => state.shop;
+
+export const selectCollections = createSelector(
+	[selectShop],
+	shop => shop.collections
+);
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import { selectCollections } from "../../redux/shop/shop.selectors";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
+
+import CollectionPreview from "../../components/collection-preview/collection-preview";
+
+const ShopPage = ({ collections }) => (
+	<div className="shop-page">
+		{collections.map(({ id, ...otherCollectionProps }) => (
+			<CollectionPreview key={id} {...otherCollectionProps} />
+		))}
+	</div>
+);
+
+const mapStateToProps = createStructuredSelector({
+	collections: selectCollections
+});
+
+export default connect(mapStateToProps)(ShopPage);
