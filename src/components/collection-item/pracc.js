@@ -379,3 +379,76 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export default connect(mapStateToProps)(ShopPage);
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import { selectCollections } from "../../redux/shop/shop.selectors";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
+
+import CollectionPreview from "../collection-preview/collection-preview";
+import "./collection-overview.scss";
+
+const CollectionOverview = ({ collections }) => (
+	<div className="collections-overview">
+		{collections.map(({ id, ...otherCollectionProps }) => (
+			<CollectionPreview key={id} {...otherCollectionProps} />
+		))}
+	</div>
+);
+
+const mapStateToProps = createStructuredSelector({
+	collections: selectCollections
+});
+
+export default connect(mapStateToProps)(CollectionOverview);
+
+////////////////////////////////////////////////////////
+
+import { createSelector } from "reselect";
+
+const selectShop = state => state.shop;
+
+const COLLECTION_ID_MAP = {
+	hats: 1,
+	jackets: 2,
+	sneakers: 3,
+	womens: 4,
+	mens: 5
+};
+
+export const selectCollections = createSelector(
+	[selectShop],
+	shop => shop.collections
+);
+
+export const selectCollection = collectionUrlParams =>
+	createSelector([selectCollections], collection =>
+		collection.find(
+			collection => collection.id === COLLECTION_ID_MAP(collectionUrlParams)
+		)
+	);
+
+////////////////////////////////////////////////////////
+
+import React from "react";
+import { connect } from "react-redux";
+import CollectionItem from "../../components/collection-item/collection-item";
+import { selectCollection } from "../../redux/shop/shop.selectors";
+import "./collection.scss";
+
+const CollectionPage = ({ collection }) => {
+	console.log(collection);
+	return (
+		<div className="collection-page">
+			<h2>COLLECTION PAGE</h2>
+		</div>
+	);
+};
+
+const mapStateToProps = (state, ownProps) => ({
+	collection: selectCollection(ownProps.match.params.collectionId)(state)
+});
+
+export default connect(mapStateToProps)(CollectionPage);
