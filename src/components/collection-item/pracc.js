@@ -423,6 +423,11 @@ export const selectCollections = createSelector(
 	shop => shop.collections
 );
 
+export const selectCollectionForPreview = createSelector(
+	[selectCollections],
+	collections => Object.keys(collections).map(key => collections[key])
+);
+
 export const selectCollection = collectionUrlParams =>
 	createSelector([selectCollections], collection =>
 		collection.find(
@@ -452,3 +457,5 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 export default connect(mapStateToProps)(CollectionPage);
+
+////////////////////////////////////////////////////////
