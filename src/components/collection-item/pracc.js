@@ -459,3 +459,31 @@ const mapStateToProps = (state, ownProps) => ({
 export default connect(mapStateToProps)(CollectionPage);
 
 ////////////////////////////////////////////////////////
+
+import React from "react";
+import StripeCheckout from "react-stripe-checkout";
+
+const StripeCheckoutButton = ({ price }) => {
+	const priceForStripe = price * 100;
+	const publishableKey = "pk_test_4X8jxgM0Tx9eruCSYvf12Oh600j4dYL1DZ";
+
+	const onToken = token => {
+		console.log(token);
+		alert("Payment Successful");
+	};
+
+	return (
+		<StripeCheckout
+			label="Pay Now"
+			name="DADA Clothing Ltd."
+			billingAddress
+			shippingAddress
+			image="svgshare"
+			description={`Your price is $${price}`}
+			amount={priceForStripe}
+			stripeKey={publishableKey}
+			token={onToken}
+			panelLabel="Pay Now"
+		/>
+	);
+};
